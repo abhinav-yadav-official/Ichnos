@@ -1,0 +1,15 @@
+groups:
+  - name: ichnos
+    rules:
+      - alert: IchnosCrawlerHighErrorRate
+        expr: |
+          sum(rate(crawler_errors_total[5m]))
+            /
+          clamp_min(sum(rate(crawler_errors_total[5m])) + sum(rate(crawler_pages_fetched_total[5m])), 1)
+            > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Ichnos crawler error rate is above 5%
+          description: More than 5% of crawler attempts are failing over the last five minutes.
