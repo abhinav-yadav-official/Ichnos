@@ -1,7 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+
+	"github.com/abhinav-yadav-official/Ichnos/internal/config"
+)
 
 func main() {
-	fmt.Println("Ichnos crawler")
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "crawler config error: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Ichnos crawler ready: %d workers, %d seed URL(s)\n", cfg.WorkerCount, len(cfg.SeedURLs))
 }
