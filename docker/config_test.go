@@ -92,6 +92,34 @@ func TestPrometheusScrapesIchnosTargetsAndLoadsAlerts(t *testing.T) {
 	}
 }
 
+func TestProductionComposeTargetsIchnosSubpath(t *testing.T) {
+	compose := readFile(t, "../docker-compose.prod.yml")
+	for _, want := range []string{
+		"BASE_PATH=/ichnos",
+		"GF_SERVER_ROOT_URL=https://abhiyadav.in/ichnos/grafana/",
+		"GF_SERVER_SERVE_FROM_SUB_PATH=true",
+		"./docker/prometheus.prod.yml:/etc/prometheus/prometheus.yml:ro",
+		"./docker/grafana/provisioning:/etc/grafana/provisioning:ro",
+		"./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro",
+		"./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro",
+	} {
+		if !strings.Contains(compose, want) {
+			t.Fatalf("docker-compose.prod.yml missing %q", want)
+		}
+	}
+
+	prometheus := readFile(t, "prometheus.prod.yml")
+	for _, want := range []string{
+		"api:8080",
+		"crawler:6060",
+		"alerts.yml",
+	} {
+		if !strings.Contains(prometheus, want) {
+			t.Fatalf("prometheus.prod.yml missing %q", want)
+		}
+	}
+}
+
 func dashboardHasPanel(panels []struct {
 	Title   string `json:"title"`
 	Targets []struct {

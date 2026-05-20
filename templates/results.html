@@ -26,17 +26,17 @@
     <nav class="mt-5 flex flex-wrap items-center gap-2 text-sm" aria-label="Pagination">
       {{if gt .Response.Page 1}}
         <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50"
-          hx-get="/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{dec .Response.Page}}"
+          hx-get="{{.BasePath}}/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{dec .Response.Page}}"
           hx-target="#results">Previous</button>
       {{end}}
       {{range seq 1 .Response.Pages}}
         <button class="rounded-md border px-3 py-2 {{if eq . $.Response.Page}}border-teal-700 bg-teal-700 text-white{{else}}border-slate-300 bg-white text-slate-700 hover:bg-slate-50{{end}}"
-          hx-get="/search?q={{$.Query}}{{if $.Domain}}&amp;domain={{$.Domain}}{{end}}&amp;page={{.}}"
+          hx-get="{{$.BasePath}}/search?q={{$.Query}}{{if $.Domain}}&amp;domain={{$.Domain}}{{end}}&amp;page={{.}}"
           hx-target="#results">{{.}}</button>
       {{end}}
       {{if lt .Response.Page .Response.Pages}}
         <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50"
-          hx-get="/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{inc .Response.Page}}"
+          hx-get="{{.BasePath}}/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{inc .Response.Page}}"
           hx-target="#results">Next</button>
       {{end}}
     </nav>

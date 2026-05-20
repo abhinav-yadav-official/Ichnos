@@ -42,18 +42,45 @@ type Hit struct {
 	CrawledAt string `json:"crawled_at"`
 }
 
+type RouterOptions struct {
+	Metrics  *ichnosmetrics.Metrics
+	BasePath string
+}
+
 func NewRouter(searcher Searcher) http.Handler {
 	return NewRouterWithMetrics(searcher, ichnosmetrics.Default)
 }
 
 func NewRouterWithMetrics(searcher Searcher, metrics *ichnosmetrics.Metrics) http.Handler {
+	return NewRouterWithOptions(searcher, RouterOptions{Metrics: metrics})
+}
+
+func NewRouterWithOptions(searcher Searcher, opts RouterOptions) http.Handler {
+	metrics := opts.Metrics
+	if metrics == nil {
+		metrics = ichnosmetrics.Default
+	}
+	basePath := normalizeBasePath(opts.BasePath)
 	tmpl := template.Must(ichnostemplates.Parse())
 	router := chi.NewRouter()
-	router.Get("/", indexHandler(tmpl))
+	registerSearchRoutes(router, searcher, metrics, tmpl, basePath)
+	if basePath != "" {
+		router.Mount(basePath, searchRoutes(searcher, metrics, tmpl, basePath))
+	}
+	return router
+}
+
+func registerSearchRoutes(router chi.Router, searcher Searcher, metrics *ichnosmetrics.Metrics, tmpl *template.Template, basePath string) {
+	router.Mount("/", searchRoutes(searcher, metrics, tmpl, basePath))
+}
+
+func searchRoutes(searcher Searcher, metrics *ichnosmetrics.Metrics, tmpl *template.Template, basePath string) http.Handler {
+	router := chi.NewRouter()
+	router.Get("/", indexHandler(tmpl, basePath))
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
-	router.Get("/search", searchHandler(searcher, metrics, tmpl))
+	router.Get("/search", searchHandler(searcher, metrics, tmpl, basePath))
 	router.Handle("/metrics", promhttp.HandlerFor(metrics.Gatherer, promhttp.HandlerOpts{}))
 	return router
 }
@@ -62,16 +89,17 @@ type templateData struct {
 	Query    string
 	Domain   string
 	Response SearchResponse
+	BasePath string
 }
 
-func indexHandler(tmpl *template.Template) http.HandlerFunc {
+func indexHandler(tmpl *template.Template, basePath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		writeHTML(w, http.StatusOK)
-		tmpl.ExecuteTemplate(w, "index.html", templateData{})
+		tmpl.ExecuteTemplate(w, "index.html", templateData{BasePath: basePath})
 	}
 }
 
-func searchHandler(searcher Searcher, metrics *ichnosmetrics.Metrics, tmpl *template.Template) http.HandlerFunc {
+func searchHandler(searcher Searcher, metrics *ichnosmetrics.Metrics, tmpl *template.Template, basePath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		defer func() {
@@ -102,6 +130,7 @@ func searchHandler(searcher Searcher, metrics *ichnosmetrics.Metrics, tmpl *temp
 				Query:    query,
 				Domain:   strings.TrimSpace(r.URL.Query().Get("domain")),
 				Response: response,
+				BasePath: basePath,
 			})
 			return
 		}
@@ -134,4 +163,12 @@ func wantsHTML(r *http.Request) bool {
 	}
 	accept := r.Header.Get("Accept")
 	return strings.Contains(accept, "text/html") && !strings.Contains(accept, "application/json")
+}
+
+func normalizeBasePath(value string) string {
+	trimmed := strings.Trim(strings.TrimSpace(value), "/")
+	if trimmed == "" {
+		return ""
+	}
+	return "/" + trimmed
 }

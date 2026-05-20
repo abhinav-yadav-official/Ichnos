@@ -66,6 +66,47 @@ func TestRouterIndexRendersSearchUI(t *testing.T) {
 	}
 }
 
+func TestRouterUsesBasePathForHTMXURLs(t *testing.T) {
+	server := httptest.NewServer(NewRouterWithOptions(&fakeSearcher{
+		response: SearchResponse{
+			Hits: []Hit{{URL: "https://go.dev/", Title: "Go", Snippet: "Go", Domain: "go.dev"}},
+			Page: 1, Pages: 2,
+		},
+	}, RouterOptions{BasePath: "/ichnos"}))
+	defer server.Close()
+
+	resp, err := http.Get(server.URL + "/ichnos/")
+	if err != nil {
+		t.Fatalf("GET /ichnos/ error = %v", err)
+	}
+	defer resp.Body.Close()
+	indexBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("read /ichnos/ body: %v", err)
+	}
+	if !strings.Contains(string(indexBody), `hx-get="/ichnos/search"`) {
+		t.Fatalf("index body missing base-path search URL:\n%s", indexBody)
+	}
+
+	req, err := http.NewRequest(http.MethodGet, server.URL+"/ichnos/search?q=golang", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("HX-Request", "true")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("GET /ichnos/search error = %v", err)
+	}
+	defer resp.Body.Close()
+	partialBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("read /ichnos/search body: %v", err)
+	}
+	if !strings.Contains(string(partialBody), `hx-get="/ichnos/search?q=golang&amp;page=2"`) {
+		t.Fatalf("partial body missing base-path pagination URL:\n%s", partialBody)
+	}
+}
+
 func TestRouterSearchReturnsJSON(t *testing.T) {
 	searcher := &fakeSearcher{
 		response: SearchResponse{

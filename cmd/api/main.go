@@ -44,7 +44,10 @@ func main() {
 
 	addr := ":8080"
 	log.Printf("Ichnos API listening on %s with OpenSearch at %s", addr, cfg.OpenSearchURL)
-	if err := http.ListenAndServe(addr, search.NewRouter(search.NewOpenSearchService(openSearchClient))); err != nil {
+	router := search.NewRouterWithOptions(search.NewOpenSearchService(openSearchClient), search.RouterOptions{
+		BasePath: cfg.BasePath,
+	})
+	if err := http.ListenAndServe(addr, router); err != nil {
 		fmt.Fprintf(os.Stderr, "api server error: %v\n", err)
 		os.Exit(1)
 	}

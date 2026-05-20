@@ -18,6 +18,7 @@ type Config struct {
 	BatchSize     int
 	StreamName    string
 	ConsumerGroup string
+	BasePath      string
 }
 
 func Load() (Config, error) {
@@ -71,6 +72,7 @@ func loadFromLookup(lookup func(string) (string, bool)) (Config, error) {
 		BatchSize:     batchSize,
 		StreamName:    values["STREAM_NAME"],
 		ConsumerGroup: values["CONSUMER_GROUP"],
+		BasePath:      normalizeBasePath(optionalValue(lookup, "BASE_PATH")),
 	}, nil
 }
 
@@ -107,4 +109,20 @@ func parseSeedURLs(value string) ([]string, error) {
 		return nil, fmt.Errorf("SEED_URLS must contain at least one URL")
 	}
 	return urls, nil
+}
+
+func optionalValue(lookup func(string) (string, bool), name string) string {
+	value, ok := lookup(name)
+	if !ok {
+		return ""
+	}
+	return strings.TrimSpace(value)
+}
+
+func normalizeBasePath(value string) string {
+	trimmed := strings.Trim(strings.TrimSpace(value), "/")
+	if trimmed == "" {
+		return ""
+	}
+	return "/" + trimmed
 }

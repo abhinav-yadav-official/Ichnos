@@ -17,6 +17,7 @@ func TestLoadFromLookupParsesConfig(t *testing.T) {
 		"BATCH_SIZE":     "100",
 		"STREAM_NAME":    "pages",
 		"CONSUMER_GROUP": "indexers",
+		"BASE_PATH":      "ichnos/",
 	}))
 	if err != nil {
 		t.Fatalf("loadFromLookup returned error: %v", err)
@@ -48,6 +49,9 @@ func TestLoadFromLookupParsesConfig(t *testing.T) {
 	}
 	if cfg.ConsumerGroup != "indexers" {
 		t.Fatalf("ConsumerGroup = %q", cfg.ConsumerGroup)
+	}
+	if cfg.BasePath != "/ichnos" {
+		t.Fatalf("BasePath = %q", cfg.BasePath)
 	}
 }
 
