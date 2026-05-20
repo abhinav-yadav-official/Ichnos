@@ -139,7 +139,7 @@ func TestNginxConfigRoutesIchnosSubpath(t *testing.T) {
 		"proxy_pass http://127.0.0.1:8086/;",
 		"proxy_set_header X-Forwarded-Prefix /ichnos;",
 		"location ^~ /ichnos/grafana/",
-		"proxy_pass http://127.0.0.1:3000/;",
+		"proxy_pass http://127.0.0.1:3000;",
 		"proxy_set_header X-Forwarded-Prefix /ichnos/grafana;",
 	} {
 		if !strings.Contains(nginx, want) {
