@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	ichnosmetrics "github.com/abhinav-yadav-official/Ichnos/internal/metrics"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -24,6 +25,7 @@ type CrawlerOptions struct {
 	WorkerCount int
 	StreamName  string
 	Logger      *log.Logger
+	Metrics     *ichnosmetrics.Metrics
 }
 
 type Crawler struct {
@@ -37,6 +39,7 @@ type Crawler struct {
 	workerCount int
 	streamName  string
 	logger      *log.Logger
+	metrics     *ichnosmetrics.Metrics
 }
 
 func NewCrawler(opts CrawlerOptions) *Crawler {
@@ -55,6 +58,7 @@ func NewCrawler(opts CrawlerOptions) *Crawler {
 		workerCount: workerCount,
 		streamName:  opts.StreamName,
 		logger:      opts.Logger,
+		metrics:     opts.Metrics,
 	}
 }
 
@@ -108,6 +112,9 @@ func (c *Crawler) worker(ctx context.Context) {
 				}
 				continue
 			}
+			if c.metrics != nil {
+				c.metrics.CrawlerErrors.WithLabelValues(crawlerErrorType(err)).Inc()
+			}
 			c.logf("crawl error: %v", err)
 		}
 	}
@@ -150,6 +157,9 @@ func (c *Crawler) CrawlOne(ctx context.Context) error {
 	}
 	if err := c.publishPage(ctx, page, parsedPage); err != nil {
 		return err
+	}
+	if c.metrics != nil {
+		c.metrics.CrawlerPagesFetched.Inc()
 	}
 	if item.Depth < c.maxDepth {
 		if err := c.pushLinks(ctx, parsedPage.Links, item.Depth+1); err != nil {
@@ -206,6 +216,19 @@ func sleepContext(ctx context.Context, delay time.Duration) bool {
 	case <-timer.C:
 		return true
 	}
+}
+
+func crawlerErrorType(err error) string {
+	if err == nil {
+		return "unknown"
+	}
+	if errors.Is(err, context.Canceled) {
+		return "context_canceled"
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		return "context_deadline"
+	}
+	return "crawl"
 }
 
 func (c *Crawler) Validate() error {

@@ -7,7 +7,9 @@ import (
 	"testing"
 	"time"
 
+	ichnosmetrics "github.com/abhinav-yadav-official/Ichnos/internal/metrics"
 	"github.com/alicebob/miniredis/v2"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -46,6 +48,7 @@ func TestCrawlerProcessesSeedPublishesPageAndQueuesLinks(t *testing.T) {
 	t.Cleanup(func() {
 		_ = client.Close()
 	})
+	metrics := ichnosmetrics.NewRegistry()
 
 	crawler := NewCrawler(CrawlerOptions{
 		Client:      client,
@@ -57,6 +60,7 @@ func TestCrawlerProcessesSeedPublishesPageAndQueuesLinks(t *testing.T) {
 		MaxDepth:    1,
 		WorkerCount: 1,
 		StreamName:  "pages",
+		Metrics:     metrics,
 	})
 
 	if err := crawler.Seed(ctx); err != nil {
@@ -92,5 +96,8 @@ func TestCrawlerProcessesSeedPublishesPageAndQueuesLinks(t *testing.T) {
 	}
 	if count != 1 {
 		t.Fatalf("frontier count = %d, want 1", count)
+	}
+	if got := testutil.ToFloat64(metrics.CrawlerPagesFetched); got != 1 {
+		t.Fatalf("crawler_pages_fetched_total = %v, want 1", got)
 	}
 }

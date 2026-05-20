@@ -15,6 +15,8 @@ import (
 	"github.com/abhinav-yadav-official/Ichnos/internal/config"
 	"github.com/abhinav-yadav-official/Ichnos/internal/crawler"
 	"github.com/abhinav-yadav-official/Ichnos/internal/indexer"
+	ichnosmetrics "github.com/abhinav-yadav-official/Ichnos/internal/metrics"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -47,6 +49,7 @@ func main() {
 	cancelIndexContext()
 
 	go func() {
+		http.Handle("/metrics", promhttp.HandlerFor(ichnosmetrics.Default.Gatherer, promhttp.HandlerOpts{}))
 		log.Printf("pprof listening on :6060")
 		if err := http.ListenAndServe(":6060", nil); err != nil {
 			log.Printf("pprof server stopped: %v", err)
@@ -67,6 +70,7 @@ func main() {
 		WorkerCount: cfg.WorkerCount,
 		StreamName:  cfg.StreamName,
 		Logger:      log.Default(),
+		Metrics:     ichnosmetrics.Default,
 	})
 
 	pageIndexer := indexer.NewBulkIndexer(openSearchClient)
@@ -79,6 +83,7 @@ func main() {
 		BatchSize:     cfg.BatchSize,
 		BlockTimeout:  5 * time.Second,
 		Logger:        log.Default(),
+		Metrics:       ichnosmetrics.Default,
 	})
 	go func() {
 		if err := consumer.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {

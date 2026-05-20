@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	ichnosmetrics "github.com/abhinav-yadav-official/Ichnos/internal/metrics"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -28,6 +29,7 @@ type ConsumerOptions struct {
 	MaxDeliveryAttempts int
 	FailureHash         string
 	Logger              *log.Logger
+	Metrics             *ichnosmetrics.Metrics
 }
 
 type Consumer struct {
@@ -41,6 +43,7 @@ type Consumer struct {
 	maxDeliveryAttempts int
 	failureHash         string
 	logger              *log.Logger
+	metrics             *ichnosmetrics.Metrics
 }
 
 func NewConsumer(opts ConsumerOptions) *Consumer {
@@ -72,6 +75,7 @@ func NewConsumer(opts ConsumerOptions) *Consumer {
 		maxDeliveryAttempts: maxAttempts,
 		failureHash:         failureHash,
 		logger:              opts.Logger,
+		metrics:             opts.Metrics,
 	}
 }
 
@@ -164,6 +168,9 @@ func (c *Consumer) ProcessOnce(ctx context.Context) (int, error) {
 	}
 	if len(ids) > 0 {
 		c.client.HDel(ctx, c.failureHash, ids...)
+	}
+	if c.metrics != nil && result.Indexed > 0 {
+		c.metrics.IndexerDocsIndexed.Add(float64(result.Indexed))
 	}
 	c.logf("indexed docs=%d failed=%d", result.Indexed, result.Failed)
 	return len(messages), nil

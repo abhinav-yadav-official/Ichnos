@@ -6,7 +6,9 @@ import (
 	"testing"
 	"time"
 
+	ichnosmetrics "github.com/abhinav-yadav-official/Ichnos/internal/metrics"
 	"github.com/alicebob/miniredis/v2"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -14,6 +16,7 @@ func TestConsumerIndexesAndAcknowledgesStreamMessages(t *testing.T) {
 	ctx := context.Background()
 	redisClient := newMiniRedisClient(t)
 	indexer := &recordingPageIndexer{}
+	metrics := ichnosmetrics.NewRegistry()
 
 	consumer := NewConsumer(ConsumerOptions{
 		Client:        redisClient,
@@ -23,6 +26,7 @@ func TestConsumerIndexesAndAcknowledgesStreamMessages(t *testing.T) {
 		ConsumerName:  "worker-1",
 		BatchSize:     100,
 		BlockTimeout:  time.Millisecond,
+		Metrics:       metrics,
 	})
 
 	if err := consumer.EnsureGroup(ctx); err != nil {
@@ -56,6 +60,9 @@ func TestConsumerIndexesAndAcknowledgesStreamMessages(t *testing.T) {
 	}
 	if len(pending) != 0 {
 		t.Fatalf("pending messages = %+v, want none after ack; message ID was %s", pending, messageID)
+	}
+	if got := testutil.ToFloat64(metrics.IndexerDocsIndexed); got != 1 {
+		t.Fatalf("indexer_docs_indexed_total = %v, want 1", got)
 	}
 }
 
