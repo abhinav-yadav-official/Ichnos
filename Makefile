@@ -25,7 +25,7 @@ deploy:
 	ssh abhiyadav.in "cd ~/Ichnos && git pull && sudo docker compose -f docker-compose.prod.yml up -d --build"
 
 vps-setup:
-	ssh abhiyadav.in "sudo apt update && sudo apt install -y docker.io docker-compose-plugin git && sudo systemctl enable --now docker && if [ ! -d ~/Ichnos ]; then git clone https://github.com/abhinav-yadav-official/Ichnos ~/Ichnos; fi"
+	ssh abhiyadav.in 'set -eu; for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove -y $$pkg >/dev/null 2>&1 || true; done; sudo apt-get update; sudo apt-get install -y ca-certificates curl git; sudo install -m 0755 -d /etc/apt/keyrings; sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc; sudo chmod a+r /etc/apt/keyrings/docker.asc; . /etc/os-release; echo "deb [arch=$$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null; sudo apt-get update; sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; sudo systemctl enable --now docker; if [ ! -d ~/Ichnos ]; then git clone https://github.com/abhinav-yadav-official/Ichnos ~/Ichnos; fi'
 
 deploy-env:
 	scp .env.prod abhiyadav.in:~/Ichnos/.env.prod
