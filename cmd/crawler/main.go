@@ -68,6 +68,24 @@ func main() {
 		StreamName:  cfg.StreamName,
 		Logger:      log.Default(),
 	})
+
+	pageIndexer := indexer.NewBulkIndexer(openSearchClient)
+	consumer := indexer.NewConsumer(indexer.ConsumerOptions{
+		Client:        redisClient,
+		Indexer:       pageIndexer,
+		StreamName:    cfg.StreamName,
+		ConsumerGroup: cfg.ConsumerGroup,
+		ConsumerName:  "worker-1",
+		BatchSize:     cfg.BatchSize,
+		BlockTimeout:  5 * time.Second,
+		Logger:        log.Default(),
+	})
+	go func() {
+		if err := consumer.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
+			log.Printf("indexer stopped: %v", err)
+		}
+	}()
+
 	log.Printf("starting crawler workers=%d seeds=%d max_depth=%d", cfg.WorkerCount, len(cfg.SeedURLs), cfg.MaxDepth)
 	if err := c.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 		fmt.Fprintf(os.Stderr, "crawler run error: %v\n", err)
