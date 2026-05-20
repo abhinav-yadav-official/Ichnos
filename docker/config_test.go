@@ -120,6 +120,25 @@ func TestProductionComposeTargetsIchnosSubpath(t *testing.T) {
 	}
 }
 
+func TestNginxConfigRoutesIchnosSubpath(t *testing.T) {
+	nginx := readFile(t, "nginx/nginx.conf")
+	for _, want := range []string{
+		"server_name abhiyadav.in;",
+		"return 301 /ichnos/;",
+		"location /ichnos/",
+		"proxy_pass http://api:8080/;",
+		"proxy_set_header X-Forwarded-Prefix /ichnos;",
+		"location /ichnos/grafana/",
+		"proxy_pass http://grafana:3000/;",
+		"/etc/letsencrypt/live/abhiyadav.in/fullchain.pem",
+		"/etc/letsencrypt/live/abhiyadav.in/privkey.pem",
+	} {
+		if !strings.Contains(nginx, want) {
+			t.Fatalf("nginx.conf missing %q", want)
+		}
+	}
+}
+
 func dashboardHasPanel(panels []struct {
 	Title   string `json:"title"`
 	Targets []struct {
