@@ -96,6 +96,7 @@ func TestProductionComposeTargetsIchnosSubpath(t *testing.T) {
 	compose := readFile(t, "../docker-compose.prod.yml")
 	for _, want := range []string{
 		"BASE_PATH=/ichnos",
+		"opensearchproject/opensearch:2.9.0",
 		"127.0.0.1:8086:8080",
 		"127.0.0.1:3000:3000",
 		"GF_SERVER_ROOT_URL=https://abhiyadav.in/ichnos/grafana/",

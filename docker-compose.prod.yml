@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   opensearch:
-    image: opensearchproject/opensearch:2.13.0
+    image: opensearchproject/opensearch:2.9.0
     environment:
       - discovery.type=single-node
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD}
