@@ -19,7 +19,7 @@ services:
     environment:
       - BASE_PATH=/ichnos
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8086:8080"
     restart: unless-stopped
     depends_on:
       redis:
@@ -53,19 +53,6 @@ services:
       timeout: 5s
       retries: 20
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    restart: unless-stopped
-    depends_on:
-      - api
-      - grafana
-
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -81,6 +68,8 @@ services:
     environment:
       - GF_SERVER_ROOT_URL=https://abhiyadav.in/ichnos/grafana/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    ports:
+      - "127.0.0.1:3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro

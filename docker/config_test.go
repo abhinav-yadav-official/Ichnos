@@ -96,15 +96,25 @@ func TestProductionComposeTargetsIchnosSubpath(t *testing.T) {
 	compose := readFile(t, "../docker-compose.prod.yml")
 	for _, want := range []string{
 		"BASE_PATH=/ichnos",
+		"127.0.0.1:8086:8080",
+		"127.0.0.1:3000:3000",
 		"GF_SERVER_ROOT_URL=https://abhiyadav.in/ichnos/grafana/",
 		"GF_SERVER_SERVE_FROM_SUB_PATH=true",
 		"./docker/prometheus.prod.yml:/etc/prometheus/prometheus.yml:ro",
 		"./docker/grafana/provisioning:/etc/grafana/provisioning:ro",
 		"./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro",
-		"./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro",
 	} {
 		if !strings.Contains(compose, want) {
 			t.Fatalf("docker-compose.prod.yml missing %q", want)
+		}
+	}
+	for _, forbidden := range []string{
+		`"80:80"`,
+		`"443:443"`,
+		"./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro",
+	} {
+		if strings.Contains(compose, forbidden) {
+			t.Fatalf("docker-compose.prod.yml should not publish host Nginx port or mount container Nginx config %q", forbidden)
 		}
 	}
 
@@ -121,20 +131,18 @@ func TestProductionComposeTargetsIchnosSubpath(t *testing.T) {
 }
 
 func TestNginxConfigRoutesIchnosSubpath(t *testing.T) {
-	nginx := readFile(t, "nginx/nginx.conf")
+	nginx := readFile(t, "nginx/ichnos.locations.conf")
 	for _, want := range []string{
-		"server_name abhiyadav.in;",
 		"return 301 /ichnos/;",
-		"location /ichnos/",
-		"proxy_pass http://api:8080/;",
+		"location ^~ /ichnos/",
+		"proxy_pass http://127.0.0.1:8086/;",
 		"proxy_set_header X-Forwarded-Prefix /ichnos;",
-		"location /ichnos/grafana/",
-		"proxy_pass http://grafana:3000/;",
-		"/etc/letsencrypt/live/abhiyadav.in/fullchain.pem",
-		"/etc/letsencrypt/live/abhiyadav.in/privkey.pem",
+		"location ^~ /ichnos/grafana/",
+		"proxy_pass http://127.0.0.1:3000/;",
+		"proxy_set_header X-Forwarded-Prefix /ichnos/grafana;",
 	} {
 		if !strings.Contains(nginx, want) {
-			t.Fatalf("nginx.conf missing %q", want)
+			t.Fatalf("ichnos.locations.conf missing %q", want)
 		}
 	}
 }
