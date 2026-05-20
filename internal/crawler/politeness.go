@@ -49,7 +49,7 @@ func (p *Politeness) Allowed(ctx context.Context, rawURL string) (bool, error) {
 	if parsed.Scheme == "" || parsed.Host == "" {
 		return false, fmt.Errorf("url must be absolute: %q", rawURL)
 	}
-	host := strings.ToLower(parsed.Hostname())
+	host := strings.ToLower(parsed.Host)
 
 	data, err := p.robotsFor(ctx, parsed.Scheme, host)
 	if err != nil {
