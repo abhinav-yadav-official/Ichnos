@@ -1,0 +1,53 @@
+{{define "results.html"}}
+{{if .Query}}
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+    <p>{{.Response.Total}} results in {{.Response.TookMS}}ms</p>
+    {{if .Domain}}<p class="rounded-md bg-teal-50 px-2 py-1 text-teal-800">{{.Domain}}</p>{{end}}
+  </div>
+{{end}}
+
+{{if .Response.Hits}}
+  <div class="space-y-3">
+    {{range .Response.Hits}}
+      <article class="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+          <span class="rounded bg-slate-100 px-2 py-1 text-slate-700">{{.Domain}}</span>
+          <time>{{.CrawledAt}}</time>
+        </div>
+        <h2 class="text-lg font-semibold leading-snug">
+          <a class="text-teal-700 underline-offset-2 hover:underline" href="{{.URL}}" target="_blank" rel="noreferrer">{{.Title}}</a>
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-slate-700">{{markHighlights .Snippet}}</p>
+      </article>
+    {{end}}
+  </div>
+
+  {{if gt .Response.Pages 1}}
+    <nav class="mt-5 flex flex-wrap items-center gap-2 text-sm" aria-label="Pagination">
+      {{if gt .Response.Page 1}}
+        <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50"
+          hx-get="/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{dec .Response.Page}}"
+          hx-target="#results">Previous</button>
+      {{end}}
+      {{range seq 1 .Response.Pages}}
+        <button class="rounded-md border px-3 py-2 {{if eq . $.Response.Page}}border-teal-700 bg-teal-700 text-white{{else}}border-slate-300 bg-white text-slate-700 hover:bg-slate-50{{end}}"
+          hx-get="/search?q={{$.Query}}{{if $.Domain}}&amp;domain={{$.Domain}}{{end}}&amp;page={{.}}"
+          hx-target="#results">{{.}}</button>
+      {{end}}
+      {{if lt .Response.Page .Response.Pages}}
+        <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50"
+          hx-get="/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{inc .Response.Page}}"
+          hx-target="#results">Next</button>
+      {{end}}
+    </nav>
+  {{end}}
+{{else if .Query}}
+  <div class="rounded-md border border-slate-200 bg-white p-8 text-center text-sm text-slate-600 shadow-sm">
+    No results
+  </div>
+{{else}}
+  <div class="rounded-md border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+    Start typing to search indexed pages.
+  </div>
+{{end}}
+{{end}}

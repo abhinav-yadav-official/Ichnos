@@ -3,12 +3,14 @@ package search
 import (
 	"context"
 	"encoding/json"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	ichnosmetrics "github.com/abhinav-yadav-official/Ichnos/internal/metrics"
+	ichnostemplates "github.com/abhinav-yadav-official/Ichnos/templates"
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -45,16 +47,31 @@ func NewRouter(searcher Searcher) http.Handler {
 }
 
 func NewRouterWithMetrics(searcher Searcher, metrics *ichnosmetrics.Metrics) http.Handler {
+	tmpl := template.Must(ichnostemplates.Parse())
 	router := chi.NewRouter()
+	router.Get("/", indexHandler(tmpl))
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
-	router.Get("/search", searchHandler(searcher, metrics))
+	router.Get("/search", searchHandler(searcher, metrics, tmpl))
 	router.Handle("/metrics", promhttp.HandlerFor(metrics.Gatherer, promhttp.HandlerOpts{}))
 	return router
 }
 
-func searchHandler(searcher Searcher, metrics *ichnosmetrics.Metrics) http.HandlerFunc {
+type templateData struct {
+	Query    string
+	Domain   string
+	Response SearchResponse
+}
+
+func indexHandler(tmpl *template.Template) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		writeHTML(w, http.StatusOK)
+		tmpl.ExecuteTemplate(w, "index.html", templateData{})
+	}
+}
+
+func searchHandler(searcher Searcher, metrics *ichnosmetrics.Metrics, tmpl *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		defer func() {
@@ -79,6 +96,15 @@ func searchHandler(searcher Searcher, metrics *ichnosmetrics.Metrics) http.Handl
 			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "search failed"})
 			return
 		}
+		if wantsHTML(r) {
+			writeHTML(w, http.StatusOK)
+			tmpl.ExecuteTemplate(w, "results.html", templateData{
+				Query:    query,
+				Domain:   strings.TrimSpace(r.URL.Query().Get("domain")),
+				Response: response,
+			})
+			return
+		}
 		writeJSON(w, http.StatusOK, response)
 	}
 }
@@ -95,4 +121,17 @@ func writeJSON(w http.ResponseWriter, status int, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(value)
+}
+
+func writeHTML(w http.ResponseWriter, status int) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+}
+
+func wantsHTML(r *http.Request) bool {
+	if r.Header.Get("HX-Request") == "true" {
+		return true
+	}
+	accept := r.Header.Get("Accept")
+	return strings.Contains(accept, "text/html") && !strings.Contains(accept, "application/json")
 }

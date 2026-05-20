@@ -1,0 +1,58 @@
+{{define "index.html"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ichnos Search</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-950">
+  <main class="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-8 sm:px-6 lg:px-8">
+    <header class="mb-6 flex flex-col gap-1 border-b border-slate-200 pb-5">
+      <h1 class="text-2xl font-semibold tracking-normal">Ichnos</h1>
+      <p class="text-sm text-slate-600">Focused crawl search across indexed pages.</p>
+    </header>
+
+    <form class="grid gap-3 rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_14rem]">
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Search
+        <input
+          class="h-11 rounded-md border border-slate-300 px-3 text-base font-normal text-slate-950 outline-none ring-teal-500 focus:ring-2"
+          type="search"
+          name="q"
+          autocomplete="off"
+          placeholder="golang"
+          hx-get="/search"
+          hx-target="#results"
+          hx-trigger="input changed delay:300ms"
+          hx-include="[name='domain']">
+      </label>
+
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Domain
+        <select
+          class="h-11 rounded-md border border-slate-300 bg-white px-3 text-base font-normal text-slate-950 outline-none ring-teal-500 focus:ring-2"
+          name="domain"
+          hx-get="/search"
+          hx-target="#results"
+          hx-trigger="change"
+          hx-include="[name='q']">
+          <option value="">All domains</option>
+          <option value="go.dev">go.dev</option>
+          <option value="github.com">github.com</option>
+          <option value="pkg.go.dev">pkg.go.dev</option>
+          <option value="hachyderm.io">hachyderm.io</option>
+          <option value="news.ycombinator.com">news.ycombinator.com</option>
+        </select>
+      </label>
+    </form>
+
+    <section id="results" class="mt-5" aria-live="polite">
+      {{template "results.html" .}}
+    </section>
+  </main>
+</body>
+</html>
+{{end}}
