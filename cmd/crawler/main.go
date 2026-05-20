@@ -14,6 +14,7 @@ import (
 
 	"github.com/abhinav-yadav-official/Ichnos/internal/config"
 	"github.com/abhinav-yadav-official/Ichnos/internal/crawler"
+	"github.com/abhinav-yadav-official/Ichnos/internal/indexer"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -31,6 +32,19 @@ func main() {
 	}
 	redisClient := redis.NewClient(redisOptions)
 	defer redisClient.Close()
+
+	openSearchClient, err := indexer.NewClient(cfg.OpenSearchURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "crawler opensearch config error: %v\n", err)
+		os.Exit(1)
+	}
+	indexContext, cancelIndexContext := context.WithTimeout(context.Background(), 10*time.Second)
+	if err := indexer.EnsurePagesIndex(indexContext, openSearchClient); err != nil {
+		cancelIndexContext()
+		fmt.Fprintf(os.Stderr, "crawler opensearch init error: %v\n", err)
+		os.Exit(1)
+	}
+	cancelIndexContext()
 
 	go func() {
 		log.Printf("pprof listening on :6060")

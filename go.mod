@@ -6,6 +6,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/bits-and-blooms/bloom/v3 v3.7.1
 	github.com/go-shiori/go-readability v0.0.0-20251205110129-5db1dc9836f0
+	github.com/opensearch-project/opensearch-go/v4 v4.6.0
 	github.com/redis/go-redis/v9 v9.19.0
 	github.com/temoto/robotstxt v1.1.2
 	golang.org/x/net v0.54.0
