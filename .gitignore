@@ -2,3 +2,11 @@ plan.md
 checkpoints.txt
 .env
 .env.prod
+
+# Hide internal notes/specs/agent docs; keep only README visible.
+*.md
+!README.md
+!AGENTS.md
+checkpoints.txt
+.agent_*
+.superpowers/
