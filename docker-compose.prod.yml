@@ -10,6 +10,13 @@ services:
         condition: service_started
       opensearch:
         condition: service_healthy
+    extra_hosts:
+      - "redis:172.18.0.10"
+      - "opensearch:172.18.0.11"
+    entrypoint:
+      - sh
+      - -c
+      - echo 'nameserver 8.8.8.8' > /etc/resolv.conf && exec /crawler
 
   api:
     build:
@@ -26,12 +33,22 @@ services:
         condition: service_started
       opensearch:
         condition: service_healthy
+    extra_hosts:
+      - "redis:172.18.0.10"
+      - "opensearch:172.18.0.11"
+    entrypoint:
+      - sh
+      - -c
+      - echo 'nameserver 8.8.8.8' > /etc/resolv.conf && exec /api
 
   redis:
     image: redis:7-alpine
     volumes:
       - redis-data:/data
     restart: unless-stopped
+    networks:
+      default:
+        ipv4_address: 172.18.0.10
 
   opensearch:
     image: opensearchproject/opensearch:2.9.0
@@ -52,6 +69,9 @@ services:
       interval: 15s
       timeout: 5s
       retries: 20
+    networks:
+      default:
+        ipv4_address: 172.18.0.11
 
   prometheus:
     image: prom/prometheus:latest
@@ -82,3 +102,9 @@ volumes:
   redis-data:
   opensearch-data:
   grafana-data:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
