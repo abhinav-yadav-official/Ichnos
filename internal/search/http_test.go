@@ -54,7 +54,8 @@ func TestRouterIndexRendersSearchUI(t *testing.T) {
 	for _, want := range []string{
 		`hx-get="/search"`,
 		`hx-target="#results"`,
-		`hx-trigger="input changed delay:300ms"`,
+		`type="submit"`,
+		`>Search<`,
 		`<select`,
 		`<option value="go.dev">go.dev</option>`,
 		`https://cdn.tailwindcss.com`,
