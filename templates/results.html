@@ -1,53 +1,75 @@
 {{define "results.html"}}
 {{if .Query}}
-  <div class="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-400">
     <p>{{.Response.Total}} results in {{.Response.TookMS}}ms</p>
-    {{if .Domain}}<p class="rounded-md bg-teal-50 px-2 py-1 text-teal-800">{{.Domain}}</p>{{end}}
+    {{if .Domain}}<span class="rounded-md bg-sky-950/50 px-2.5 py-1 text-xs font-medium text-sky-400 ring-1 ring-sky-800">{{.Domain}}</span>{{end}}
   </div>
 {{end}}
 
 {{if .Response.Hits}}
   <div class="space-y-3">
     {{range .Response.Hits}}
-      <article class="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+      <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-md shadow-sky-950/10 transition-all duration-200 hover:border-slate-700 hover:shadow-lg hover:shadow-sky-950/20">
         <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-          <span class="rounded bg-slate-100 px-2 py-1 text-slate-700">{{.Domain}}</span>
+          <span class="rounded-md bg-slate-800 px-2 py-1 text-slate-300">{{.Domain}}</span>
           <time>{{.CrawledAt}}</time>
         </div>
         <h2 class="text-lg font-semibold leading-snug">
-          <a class="text-teal-700 underline-offset-2 hover:underline" href="{{.URL}}" target="_blank" rel="noreferrer">{{.Title}}</a>
+          <a class="text-sky-400 underline-offset-2 transition-colors hover:text-sky-300 hover:underline" href="{{.URL}}" target="_blank" rel="noreferrer">{{.Title}}</a>
         </h2>
-        <p class="mt-2 text-sm leading-6 text-slate-700">{{markHighlights .Snippet}}</p>
+        <p class="mt-2 text-sm leading-6 text-slate-400">{{markHighlights .Snippet}}</p>
       </article>
     {{end}}
   </div>
 
   {{if gt .Response.Pages 1}}
-    <nav class="mt-5 flex flex-wrap items-center gap-2 text-sm" aria-label="Pagination">
+    <nav class="mt-6 flex flex-wrap items-center gap-2 text-sm" aria-label="Pagination">
       {{if gt .Response.Page 1}}
-        <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50"
+        <button class="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900/60 px-3.5 py-2 text-slate-300 shadow-sm transition-all hover:border-slate-600 hover:bg-slate-800/80 hover:text-slate-100"
           hx-get="{{.BasePath}}/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{dec .Response.Page}}"
-          hx-target="#results">Previous</button>
+          hx-target="#results"
+          hx-indicator="#search-spinner">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          Previous
+        </button>
       {{end}}
       {{range seq 1 .Response.Pages}}
-        <button class="rounded-md border px-3 py-2 {{if eq . $.Response.Page}}border-teal-700 bg-teal-700 text-white{{else}}border-slate-300 bg-white text-slate-700 hover:bg-slate-50{{end}}"
+        <button class="inline-flex items-center justify-center rounded-lg border px-3.5 py-2 shadow-sm transition-all {{if eq . $.Response.Page}}border-sky-500 bg-sky-600 text-white shadow-sky-950/30{{else}}border-slate-700 bg-slate-900/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800/80 hover:text-slate-100{{end}}"
           hx-get="{{$.BasePath}}/search?q={{$.Query}}{{if $.Domain}}&amp;domain={{$.Domain}}{{end}}&amp;page={{.}}"
-          hx-target="#results">{{.}}</button>
+          hx-target="#results"
+          hx-indicator="#search-spinner">{{.}}</button>
       {{end}}
       {{if lt .Response.Page .Response.Pages}}
-        <button class="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-50"
+        <button class="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900/60 px-3.5 py-2 text-slate-300 shadow-sm transition-all hover:border-slate-600 hover:bg-slate-800/80 hover:text-slate-100"
           hx-get="{{.BasePath}}/search?q={{.Query}}{{if .Domain}}&amp;domain={{.Domain}}{{end}}&amp;page={{inc .Response.Page}}"
-          hx-target="#results">Next</button>
+          hx-target="#results"
+          hx-indicator="#search-spinner">
+          Next
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </button>
       {{end}}
     </nav>
   {{end}}
 {{else if .Query}}
-  <div class="rounded-md border border-slate-200 bg-white p-8 text-center text-sm text-slate-600 shadow-sm">
-    No results
+  <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-10 text-center text-sm text-slate-500 shadow-md shadow-sky-950/10">
+    <svg class="mx-auto mb-3 h-10 w-10 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+      <path d="M8 11h6"/>
+    </svg>
+    <p>No results found for <span class="font-medium text-slate-300">"{{.Query}}"</span></p>
   </div>
 {{else}}
-  <div class="rounded-md border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-    Start typing to search indexed pages.
+  <div class="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-12 text-center text-sm text-slate-600 shadow-inner">
+    <svg class="mx-auto mb-3 h-12 w-12 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+    <p>Start typing to search indexed pages.</p>
   </div>
 {{end}}
 {{end}}
