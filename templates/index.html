@@ -7,8 +7,8 @@
   <title>Ichnos Search</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMwZjE3MmEiIHN0cm9rZT0iIzM4YmRmOCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMzIiIHk9IjQzIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLC1hcHBsZS1zeXN0ZW0sc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjgwMCIgZm9udC1zaXplPSIyNiIgZmlsbD0iIzM4YmRmOCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SWM8L3RleHQ+PC9zdmc+">
-  <link rel="apple-touch-icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMwZjE3MmEiIHN0cm9rZT0iIzM4YmRmOCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMzIiIHk9IjQzIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLC1hcHBsZS1zeXN0ZW0sc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjgwMCIgZm9udC1zaXplPSIyNiIgZmlsbD0iIzM4YmRmOCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SWM8L3RleHQ+PC9zdmc+">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjMGYxNzJhIiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjMyIiB5PSI0MyIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwtYXBwbGUtc3lzdGVtLHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtc2l6ZT0iMjYiIGZpbGw9IiMzOGJkZjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkljPC90ZXh0Pjwvc3ZnPg==">
+  <link rel="apple-touch-icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjMGYxNzJhIiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjMyIiB5PSI0MyIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwtYXBwbGUtc3lzdGVtLHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtc2l6ZT0iMjYiIGZpbGw9IiMzOGJkZjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkljPC90ZXh0Pjwvc3ZnPg==">
   <style>
     .htmx-indicator {
       opacity: 0;
@@ -62,12 +62,12 @@
     <header class="mb-8 flex flex-col gap-1 border-b border-slate-800 pb-6">
       <div class="flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9" aria-hidden="true">
-          <rect width="32" height="32" rx="7" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+          <rect width="32" height="32" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
           <text x="16" y="22" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="13" fill="#38bdf8" text-anchor="middle">Ic</text>
         </svg>
         <div>
           <h1 class="text-2xl font-semibold tracking-normal text-slate-100">Ichnos</h1>
-          <p class="text-sm text-slate-400">Focused crawl search across indexed pages.</p>
+          <p class="text-sm text-slate-400">A simple search engine</p>
         </div>
       </div>
     </header>
@@ -75,22 +75,26 @@
     <form class="grid gap-4 rounded-xl border border-slate-800 bg-slate-900/80 p-5 shadow-lg shadow-sky-950/20 backdrop-blur-sm sm:grid-cols-[minmax(0,1fr)_14rem]" hx-get="{{.BasePath}}/search" hx-target="#results" hx-indicator="#search-spinner">
       <label class="flex flex-col gap-1.5 text-sm font-medium text-slate-300">
         <span>Search</span>
-        <div class="relative">
-          <input
-            class="peer h-11 w-full rounded-lg border border-slate-700 bg-slate-800/80 pl-10 pr-3 text-base font-normal text-slate-100 placeholder-slate-500 outline-none ring-sky-500 transition-shadow focus:ring-2"
-            type="search"
-            name="q"
-            autocomplete="off"
-            placeholder="golang"
-            hx-get="{{.BasePath}}/search"
-            hx-target="#results"
-            hx-trigger="input changed delay:300ms"
-            hx-include="[name='domain']"
-            hx-indicator="#search-spinner">
-          <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <input
+              class="peer h-11 w-full rounded-lg border border-slate-700 bg-slate-800/80 pl-10 pr-3 text-base font-normal text-slate-100 placeholder-slate-500 outline-none ring-sky-500 transition-shadow focus:ring-2"
+              type="search"
+              name="q"
+              autocomplete="off"
+              placeholder="golang">
+            <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </div>
+          <button type="submit" class="flex h-11 shrink-0 items-center gap-2 rounded-lg border border-sky-500/50 bg-sky-500/10 px-4 text-sm font-medium text-sky-400 transition-colors hover:bg-sky-500/20 focus-visible:outline-2 focus-visible:outline-sky-400">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            Search
+          </button>
         </div>
       </label>
 
@@ -98,12 +102,7 @@
         <span>Domain</span>
         <select
           class="h-11 w-full rounded-lg border border-slate-700 bg-slate-800/80 px-3 text-base font-normal text-slate-100 outline-none ring-sky-500 transition-shadow focus:ring-2"
-          name="domain"
-          hx-get="{{.BasePath}}/search"
-          hx-target="#results"
-          hx-trigger="change"
-          hx-include="[name='q']"
-          hx-indicator="#search-spinner">
+          name="domain">
           <option value="">All domains</option>
           <option value="go.dev">go.dev</option>
           <option value="github.com">github.com</option>
